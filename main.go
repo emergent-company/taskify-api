@@ -22,13 +22,13 @@ var (
 )
 
 func main() {
-	http.HandleFunc("/tasks", handleTasks)
-	http.HandleFunc("/tasks/", handleTaskByID)
+	http.HandleFunc("/tasks", tasksHandler)
+	http.HandleFunc("/tasks/", taskRouter)
 	fmt.Println("taskify-api listening on :8080")
 	http.ListenAndServe(":8080", nil)
 }
 
-func handleTasks(w http.ResponseWriter, r *http.Request) {
+func tasksHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		mu.Lock()
@@ -54,30 +54,44 @@ func handleTasks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleTaskByID(w http.ResponseWriter, r *http.Request) {
+func taskRouter(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/tasks/"), "/")
 	if len(parts) < 1 {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
-	id, err := strconv.Atoi(parts[0])
+
+	if len(parts) == 2 && parts[1] == "complete" {
+		completeTaskHandler(w, r, parts[0])
+		return
+	}
+
+	http.Error(w, "not found", http.StatusNotFound)
+}
+
+func completeTaskHandler(w http.ResponseWriter, r *http.Request, idStr string) {
+	if r.Method != http.MethodPatch {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "invalid id", http.StatusBadRequest)
 		return
 	}
-	if len(parts) == 2 && parts[1] == "complete" && r.Method == http.MethodPatch {
-		mu.Lock()
-		defer mu.Unlock()
-		for i, t := range tasks {
-			if t.ID == id {
-				tasks[i].Completed = true
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(tasks[i])
-				return
-			}
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	for i, t := range tasks {
+		if t.ID == id {
+			tasks[i].Completed = true
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(tasks[i])
+			return
 		}
-		http.Error(w, "not found", http.StatusNotFound)
-		return
 	}
+
 	http.Error(w, "not found", http.StatusNotFound)
 }
