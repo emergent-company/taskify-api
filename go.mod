@@ -1,3 +1,5 @@
 module github.com/e2e-test/taskify-api
 
 go 1.22
+
+require github.com/lib/pq v1.12.3 // indirect
