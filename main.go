@@ -3,21 +3,18 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/e2e-test/taskify-api/internal/handler"
+	"github.com/e2e-test/taskify-api/internal/service"
 )
 
+var taskStore *service.TaskStore
+
 func main() {
-	http.HandleFunc("/tasks", handleTasks)
-	http.HandleFunc("/tasks/", handleTaskByID)
+	taskStore = service.NewTaskStore()
+	taskHandler := handler.NewTaskHandler(taskStore)
+
+	http.HandleFunc("/api/v1/tasks", taskHandler.HandleListTasks)
 	fmt.Println("taskify-api listening on :8080")
 	http.ListenAndServe(":8080", nil)
-}
-
-// TODO: implement POST /tasks (create task) and GET /tasks (list tasks)
-func handleTasks(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
-
-// TODO: implement PATCH /tasks/{id}/complete
-func handleTaskByID(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
 }
