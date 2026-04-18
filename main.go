@@ -39,8 +39,8 @@ func main() {
 	taskByIDHandler := handler.NewTaskByIDHandler(taskService)
 
 	// Register routes
-	http.HandleFunc("/tasks", taskHandler.HandleListTasks)
-	http.HandleFunc("/tasks/", taskByIDHandler.HandleTaskByID)
+	http.HandleFunc("/api/v1/tasks", taskHandler.HandleListTasks)
+	http.HandleFunc("/api/v1/tasks/", taskByIDHandler.HandleTaskByID)
 
 	fmt.Println("taskify-api listening on :8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
