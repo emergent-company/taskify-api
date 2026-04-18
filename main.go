@@ -1,23 +1,49 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+
+	"github.com/e2e-test/taskify-api/db"
+	"github.com/e2e-test/taskify-api/handler"
+	"github.com/e2e-test/taskify-api/service"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	http.HandleFunc("/tasks", handleTasks)
-	http.HandleFunc("/tasks/", handleTaskByID)
+	// Get database URL from environment or use default
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		dbURL = "postgres://localhost/taskify"
+	}
+
+	// Connect to database
+	dbConn, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	if err := dbConn.Ping(); err != nil {
+		log.Fatalf("Failed to ping database: %v", err)
+	}
+	defer dbConn.Close()
+
+	// Initialize services and handlers
+	queries := db.NewQueries(dbConn)
+	taskService := service.NewTaskService(queries)
+	taskHandler := handler.NewTaskHandler(taskService)
+	taskByIDHandler := handler.NewTaskByIDHandler(taskService)
+
+	// Register routes
+	http.HandleFunc("/tasks", taskHandler.HandleListTasks)
+	http.HandleFunc("/tasks/", taskByIDHandler.HandleTaskByID)
+
 	fmt.Println("taskify-api listening on :8080")
-	http.ListenAndServe(":8080", nil)
-}
-
-// TODO: implement POST /tasks (create task) and GET /tasks (list tasks)
-func handleTasks(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
-}
-
-// TODO: implement PATCH /tasks/{id}/complete
-func handleTaskByID(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "not implemented", http.StatusNotImplemented)
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatalf("Server failed: %v", err)
+	}
 }
