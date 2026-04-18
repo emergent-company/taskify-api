@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/e2e-test/taskify-api/db"
-	"github.com/e2e-test/taskify-api/handler"
-	"github.com/e2e-test/taskify-api/service"
+	"github.com/e2e-test/taskify-api/internal/db"
+	"github.com/e2e-test/taskify-api/internal/handler"
+	"github.com/e2e-test/taskify-api/internal/service"
 
 	_ "github.com/lib/pq"
 )

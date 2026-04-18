@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/e2e-test/taskify-api/db"
+	"github.com/e2e-test/taskify-api/internal/db"
 )
 
 // TaskService provides business logic for tasks

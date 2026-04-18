@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/e2e-test/taskify-api/service"
+	"github.com/e2e-test/taskify-api/internal/service"
 	"github.com/google/uuid"
 )
 
