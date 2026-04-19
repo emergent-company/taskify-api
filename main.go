@@ -19,5 +19,9 @@ func handleTasks(w http.ResponseWriter, r *http.Request) {
 
 // TODO: implement PATCH /tasks/{id}/complete
 func handleTaskByID(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPatch {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
 	http.Error(w, "not implemented", http.StatusNotImplemented)
 }
