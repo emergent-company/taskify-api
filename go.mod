@@ -1,3 +1,3 @@
-module github.com/e2e-test/taskify-api
-
-go 1.22
+     1	module taskify-api
+     2	
+     3	go 1.22
